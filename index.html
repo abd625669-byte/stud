@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منظم السادس العلمي</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>🗓️ منظم الدراسة الذكي لطلبة السادس العلمي</h1>
+        
+        <!-- قسم إدخال البيانات -->
+        <div id="setup-section" class="card">
+            <h2>خطوة 1: أدخل بياناتك الدراسية</h2>
+            
+            <div class="form-group">
+                <label for="student-name">الاسم الثنائي:</label>
+                <input type="text" id="student-name" placeholder="مثال: علي أحمد">
+            </div>
+
+            <div class="form-group">
+                <label>حدد المواد التي ترغب بدراستها:</label>
+                <div class="subjects-grid">
+                    <label><input type="checkbox" value="الإسلامية" checked> الإسلامية</label>
+                    <label><input type="checkbox" value="العربية" checked> العربية</label>
+                    <label><input type="checkbox" value="الإنجليزية" checked> الإنجليزية</label>
+                    <label><input type="checkbox" value="الأحياء" checked> الأحياء</label>
+                    <label><input type="checkbox" value="الكيمياء" checked> الكيمياء</label>
+                    <label><input type="checkbox" value="الفيزياء" checked> الفيزياء</label>
+                    <label><input type="checkbox" value="الرياضيات" checked> الرياضيات</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="daily-subjects">عدد المواد المراد دراستها في اليوم الواحد:</label>
+                <input type="number" id="daily-subjects" min="1" max="7" value="3">
+            </div>
+
+            <div class="time-group">
+                <div class="form-group">
+                    <label for="sleep-time">وقت النوم:</label>
+                    <input type="time" id="sleep-time" value="23:00">
+                </div>
+                <div class="form-group">
+                    <label for="wake-time">وقت الاستيقاظ:</label>
+                    <input type="time" id="wake-time" value="06:00">
+                </div>
+            </div>
+
+            <button onclick="generateSchedule()" class="btn-primary">توليد الجدول الدراسي ✨</button>
+        </div>
+
+        <!-- قسم عرض الجدول الدراسي -->
+        <div id="schedule-section" class="card hidden">
+            <div class="schedule-header">
+                <h2>جدول الطالب: <span id="display-name"></span></h2>
+                <button onclick="resetForm()" class="btn-secondary">إعادة ضبط البيانات 🔄</button>
+            </div>
+            <p class="hint">💡 يمكنك الضغط مباشرة على اسم المادة أو الوقت في الجدول لتعديله يدوياً!</p>
+            
+            <table id="schedule-table">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>المواد الدراسية وأوقاتها البدء</th>
+                    </tr>
+                </thead>
+                <tbody id="schedule-body">
+                    <!-- سيتم توليد الصفوف هنا بواسطة الجافاسكريبت -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
