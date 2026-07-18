@@ -1,0 +1,1109 @@
+/* ==========================================================================
+   Design System & Variables (Modern Cyber-Academic Dark Theme)
+   ========================================================================== */
+:root {
+    /* Colors */
+    --bg-main: hsl(224, 45%, 8%);
+    --bg-card: hsla(223, 40%, 12%, 0.7);
+    --border-color: hsla(220, 30%, 25%, 0.5);
+    --border-hover: hsla(262, 80%, 65%, 0.5);
+    
+    --text-primary: hsl(210, 38%, 95%);
+    --text-secondary: hsl(215, 20%, 65%);
+    --text-muted: hsl(215, 16%, 45%);
+
+    --color-primary: hsl(262, 83%, 62%);
+    --color-primary-glow: hsla(262, 83%, 62%, 0.3);
+    --color-secondary: hsl(230, 96%, 66%);
+    --color-accent: hsl(172, 90%, 45%);
+    --color-accent-glow: hsla(172, 90%, 45%, 0.35);
+    
+    /* Subject Specific Colors (Premium Palette) */
+    --color-subject-ar: hsl(346, 85%, 57%);      /* عربي - أحمر قرمزي */
+    --color-subject-en: hsl(200, 95%, 50%);      /* انكليزي - أزرق سماوي */
+    --color-subject-islam: hsl(145, 75%, 45%);   /* اسلامية - أخضر إسلامي */
+    --color-subject-bio: hsl(95, 70%, 45%);      /* احياء - أخضر عشبي */
+    --color-subject-chem: hsl(280, 80%, 55%);     /* كيمياء - بنفسجي */
+    --color-subject-phys: hsl(25, 95%, 53%);      /* فيزياء - برتقالي لهبي */
+    --color-subject-math: hsl(315, 85%, 55%);     /* رياضيات - زهري فاقع */
+    --color-subject-break: hsl(210, 15%, 55%);    /* استراحة - رمادي مزرق */
+
+    /* Typography & Shadows */
+    --font-ar: 'Cairo', sans-serif;
+    --font-en: 'Outfit', sans-serif;
+    --shadow-main: 0 20px 50px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 20px rgba(110, 68, 255, 0.2);
+    --shadow-accent: 0 0 15px rgba(26, 212, 178, 0.25);
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Base Styles & Reset
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-ar);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+    padding: 2rem 1rem;
+}
+
+/* Background Glow Effects */
+.bg-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(140px);
+    z-index: -1;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: all 1s ease;
+}
+
+.bg-glow-1 {
+    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+    top: -200px;
+    right: -100px;
+}
+
+.bg-glow-2 {
+    background: radial-gradient(circle, var(--color-secondary) 0%, transparent 70%);
+    bottom: -100px;
+    left: -200px;
+}
+
+.app-container {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   Typography & Headers
+   ========================================================================== */
+.app-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.logo-icon {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-glow);
+}
+
+h1 {
+    font-size: 2.25rem;
+    font-weight: 850;
+    letter-spacing: -0.5px;
+    background: linear-gradient(120deg, var(--text-primary) 30%, hsl(220, 20%, 80%) 50%, var(--color-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    font-weight: 400;
+}
+
+/* ==========================================================================
+   Cards & Layout Components (Glassmorphism)
+   ========================================================================== */
+.card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 2.25rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-main);
+    transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.card:hover {
+    border-color: hsla(220, 30%, 30%, 0.7);
+}
+
+.card-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.25rem;
+}
+
+.card-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.card-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* ==========================================================================
+   Form Fields & Inputs
+   ========================================================================== */
+.form-group {
+    margin-bottom: 1.75rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    color: var(--text-primary);
+}
+
+.field-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* Input Wrapper & Icon */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    right: 1.25rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+input[type="text"],
+input[type="time"],
+select {
+    width: 100%;
+    padding: 0.9rem 1.25rem 0.9rem 3rem; /* Extra padding left for icons/arrows */
+    padding-right: 3rem; /* Padding right for the input icon */
+    background-color: hsla(222, 35%, 6%, 0.5);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: var(--font-ar);
+    font-size: 1rem;
+    transition: all var(--transition-fast);
+}
+
+input[type="text"]:focus,
+input[type="time"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
+    background-color: hsla(222, 35%, 4%, 0.8);
+}
+
+/* Select wrapper styling */
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper::after {
+    content: "";
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--text-secondary);
+    pointer-events: none;
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+.form-row {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.form-row .col {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Custom Subjects Grid (Selection Cards)
+   ========================================================================== */
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.85rem;
+}
+
+.subject-checkbox-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.1rem 0.75rem;
+    background-color: hsla(222, 35%, 6%, 0.35);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    user-select: none;
+}
+
+.subject-checkbox-card input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.subject-indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-bottom: 0.75rem;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* Setup colors */
+.lang-ar { background-color: var(--color-subject-ar); }
+.lang-en { background-color: var(--color-subject-en); }
+.islam { background-color: var(--color-subject-islam); }
+.biology { background-color: var(--color-subject-bio); }
+.chemistry { background-color: var(--color-subject-chem); }
+.physics { background-color: var(--color-subject-phys); }
+.math { background-color: var(--color-subject-math); }
+
+.subject-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    transition: color var(--transition-fast);
+}
+
+/* Checkbox Card Active States */
+.subject-checkbox-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+}
+
+.subject-checkbox-card.checked {
+    background-color: hsla(262, 83%, 62%, 0.08);
+    border-color: var(--color-primary);
+    box-shadow: 0 5px 15px rgba(110, 68, 255, 0.15);
+}
+
+.subject-checkbox-card.checked .subject-label {
+    color: var(--text-primary);
+}
+
+.subject-checkbox-card.checked::after {
+    content: "✓";
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--color-accent);
+}
+
+/* ==========================================================================
+   Buttons System
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    font-family: var(--font-ar);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.85rem 1.75rem;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(110, 68, 255, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background-color: hsla(220, 20%, 18%, 0.8);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: hsla(220, 20%, 23%, 0.8);
+    border-color: var(--text-secondary);
+}
+
+.btn-accent {
+    background: linear-gradient(135deg, var(--color-accent), hsl(172, 90%, 35%));
+    color: hsl(224, 45%, 8%);
+    box-shadow: var(--shadow-accent);
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(26, 212, 178, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+#generate-schedule-btn {
+    width: 100%;
+}
+
+/* ==========================================================================
+   Generated Schedule Screen
+   ========================================================================== */
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+}
+
+.student-info-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.student-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--color-primary-glow), var(--color-accent-glow));
+    border: 1.5px solid var(--color-accent);
+    color: var(--color-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-accent);
+}
+
+#schedule-student-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: hsla(172, 90%, 45%, 0.1);
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 50px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Stats Cards Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.25rem;
+}
+
+.stat-card {
+    background-color: hsla(222, 35%, 6%, 0.35);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-en), var(--font-ar);
+}
+
+.progress-value {
+    color: var(--color-accent);
+    text-shadow: 0 0 10px var(--color-accent-glow);
+}
+
+/* Tabs Scroll Component */
+.tabs-scroll-container {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.tabs-scroll-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tabs-scroll-container::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+.days-tabs {
+    display: flex;
+    gap: 0.5rem;
+    min-width: max-content;
+}
+
+.tab-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.65rem 1.35rem;
+    border-radius: 50px;
+    font-family: var(--font-ar);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+}
+
+.tab-btn.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-glow);
+}
+
+/* ==========================================================================
+   Schedule Timetable (Timeline Style)
+   ========================================================================== */
+.schedule-body {
+    position: relative;
+    padding-right: 1.5rem; /* Space for the timeline line */
+}
+
+.timeline-indicator {
+    position: absolute;
+    right: 4.5px;
+    top: 5px;
+    bottom: 5px;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+    border-radius: 3px;
+    opacity: 0.7;
+}
+
+.schedule-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Individual Slot Card */
+.slot-card {
+    position: relative;
+    background-color: hsla(222, 35%, 6%, 0.35);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all var(--transition-normal);
+}
+
+.slot-card::before {
+    content: "";
+    position: absolute;
+    top: -1.5px;
+    bottom: -1.5px;
+    right: -1.5px;
+    width: 6px;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background-color: var(--subject-color, var(--color-subject-break));
+}
+
+.slot-card:hover {
+    border-color: var(--border-hover);
+    transform: translateX(-4px); /* Slide left slightly in RTL */
+    background-color: hsla(222, 35%, 8%, 0.6);
+}
+
+/* Bullet on the Timeline */
+.slot-bullet {
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--subject-color, var(--color-subject-break));
+    border: 2px solid var(--bg-main);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+/* Slot Content Layout */
+.slot-info {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.slot-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.slot-checkbox svg {
+    opacity: 0;
+    color: var(--bg-main);
+    transition: opacity var(--transition-fast);
+}
+
+.slot-checkbox.checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-accent);
+}
+
+.slot-checkbox.checked svg {
+    opacity: 1;
+}
+
+.slot-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.slot-time {
+    font-family: var(--font-en), var(--font-ar);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.slot-subject-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.slot-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-slot-edit {
+    background-color: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-slot-edit:hover {
+    color: var(--color-accent);
+    background-color: hsla(172, 90%, 45%, 0.1);
+}
+
+/* Checked Slot Styling */
+.slot-card.completed {
+    opacity: 0.5;
+    background-color: hsla(222, 35%, 4%, 0.2);
+}
+
+.slot-card.completed .slot-subject-name {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+}
+
+/* Dynamic Colors mapping in timeline elements */
+.slot-card[data-subject-type="اللغة العربية"] { --subject-color: var(--color-subject-ar); }
+.slot-card[data-subject-type="اللغة الإنكليزية"] { --subject-color: var(--color-subject-en); }
+.slot-card[data-subject-type="التربية الإسلامية"] { --subject-color: var(--color-subject-islam); }
+.slot-card[data-subject-type="علم الأحياء"] { --subject-color: var(--color-subject-bio); }
+.slot-card[data-subject-type="الكيمياء"] { --subject-color: var(--color-subject-chem); }
+.slot-card[data-subject-type="الفيزياء"] { --subject-color: var(--color-subject-phys); }
+.slot-card[data-subject-type="الرياضيات"] { --subject-color: var(--color-subject-math); }
+.slot-card[data-subject-type="استراحة"] { --subject-color: var(--color-subject-break); }
+
+/* ==========================================================================
+   Footer Tips Section
+   ========================================================================== */
+.schedule-footer {
+    margin-top: 2.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.tips-box {
+    background-color: hsla(172, 90%, 45%, 0.05);
+    border: 1px dashed var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+}
+
+.tips-box h3 {
+    font-size: 1rem;
+    color: var(--color-accent);
+    margin-bottom: 0.4rem;
+}
+
+.tips-box p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Interactive Modals
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(6, 12, 26, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity var(--transition-fast);
+    padding: 1rem;
+}
+
+.modal-content {
+    max-width: 450px;
+    width: 100%;
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--border-color);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    animation: modalSlideUp var(--transition-normal);
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.close-modal-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.75rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: color var(--transition-fast);
+}
+
+.close-modal-btn:hover {
+    color: var(--color-subject-ar);
+}
+
+/* ==========================================================================
+   Responsive & Adaptive Styles
+   ========================================================================== */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem 0.5rem;
+    }
+    
+    .card {
+        padding: 1.5rem 1.25rem;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .subjects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.6rem;
+    }
+
+    .subject-checkbox-card {
+        padding: 0.9rem 0.5rem;
+    }
+
+    .schedule-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .header-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .slot-card {
+        padding: 1rem;
+    }
+
+    .slot-info {
+        gap: 0.75rem;
+    }
+
+    .slot-subject-name {
+        font-size: 1rem;
+    }
+}
+
+/* ==========================================================================
+   Loud Alarm Screen Styles (Eye-catching & Immersive)
+   ========================================================================== */
+.alarm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, hsl(346, 85%, 20%) 0%, hsl(224, 45%, 5%) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 1.5rem;
+    animation: alarmPulse 1.5s infinite alternate;
+}
+
+@keyframes alarmPulse {
+    0% {
+        box-shadow: inset 0 0 100px rgba(255, 0, 0, 0.4);
+    }
+    100% {
+        box-shadow: inset 0 0 150px rgba(255, 0, 0, 0.8);
+        background-color: hsl(346, 85%, 15%);
+    }
+}
+
+.alarm-box {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    padding: 3rem 2rem;
+    border: 2px solid var(--color-subject-ar);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.3);
+    background: hsla(224, 45%, 8%, 0.85);
+    animation: alarmShaking 0.5s infinite;
+}
+
+@keyframes alarmShaking {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(0px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(2px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.alarm-icon {
+    color: var(--color-subject-ar);
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    animation: alarmIconRing 0.3s infinite alternate;
+}
+
+@keyframes alarmIconRing {
+    0% { transform: scale(1.1) rotate(-8deg); }
+    100% { transform: scale(1.1) rotate(8deg); }
+}
+
+.alarm-box h2 {
+    font-size: 1.8rem;
+    font-weight: 850;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.alarm-message {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+#alarm-subject-name {
+    color: var(--color-accent);
+    text-shadow: 0 0 10px var(--color-accent-glow);
+    font-size: 1.45rem;
+    padding: 0 5px;
+}
+
+.alarm-hint {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+.btn-alarm {
+    background: linear-gradient(135deg, var(--color-subject-ar), hsl(346, 85%, 40%));
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 1rem 2rem;
+    box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
+    width: 100%;
+}
+
+.btn-alarm:hover {
+    transform: scale(1.03) !important;
+    box-shadow: 0 15px 30px rgba(255, 0, 0, 0.6);
+    filter: brightness(1.1);
+}
+
+/* ==========================================================================
+   Print Stylesheet (Stunning output layout for PDF generation)
+   ========================================================================== */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+    }
+
+    .bg-glow, 
+    .app-header .subtitle,
+    .header-actions,
+    .btn-slot-edit,
+    .slot-checkbox,
+    .timeline-indicator,
+    .slot-bullet,
+    .modal-overlay,
+    .schedule-footer {
+        display: none !important;
+    }
+
+    .app-container {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .glass-card {
+        background: white !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 0.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .stat-card {
+        background: #f5f7fa !important;
+        border: 1px solid #ddd !important;
+        color: black !important;
+        padding: 0.5rem !important;
+    }
+
+    .stat-value {
+        color: black !important;
+        font-size: 1rem !important;
+        text-shadow: none !important;
+    }
+
+    .days-tabs {
+        display: none !important;
+    }
+
+    /* Print all weekdays schedules sequentially instead of tabs! */
+    .days-print-section {
+        display: block !important;
+        page-break-after: always;
+    }
+
+    .days-print-title {
+        display: block !important;
+        font-size: 1.3rem !important;
+        font-weight: bold !important;
+        margin: 1.5rem 0 0.5rem 0 !important;
+        border-bottom: 2px solid #333 !important;
+        padding-bottom: 0.25rem !important;
+        color: black !important;
+    }
+
+    .schedule-body {
+        padding-right: 0 !important;
+    }
+
+    .schedule-timeline {
+        gap: 0.5rem !important;
+    }
+
+    .slot-card {
+        background: #fcfcfc !important;
+        border: 1px solid #ccc !important;
+        border-radius: 6px !important;
+        padding: 0.6rem 1rem !important;
+        color: black !important;
+        transform: none !important;
+        opacity: 1 !important;
+        page-break-inside: avoid;
+    }
+
+    .slot-card::before {
+        width: 4px !important;
+        border-radius: 0 6px 6px 0 !important;
+    }
+
+    .slot-subject-name {
+        color: black !important;
+        font-size: 0.95rem !important;
+        text-decoration: none !important;
+    }
+
+    .slot-time {
+        color: #555 !important;
+        font-size: 0.8rem !important;
+    }
+}

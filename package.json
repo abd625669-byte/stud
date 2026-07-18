@@ -1,0 +1,16 @@
+{
+  "name": "six-scientific-study-planner",
+  "version": "1.0.0",
+  "description": "Smart study planner for Iraqi Sixth Scientific Grade students with built-in voice/siren alarms.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx -y browser-sync start --server --files \"*.html, *.css, *.js\" --port 3000"
+  },
+  "keywords": [
+    "study-planner",
+    "sixth-scientific",
+    "iraq"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}
