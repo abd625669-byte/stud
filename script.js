@@ -1,6 +1,6 @@
-// 1. استيراد مكتبات Firebase المطلوبة بالتوافق مع إصدار مشروعك
+// 1. استيراد مكتبة Realtime Database المتوافقة مع إصدار مشروعك
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 
 // 2. إعدادات Firebase الخاصة بمشروعك stud-2027
 const firebaseConfig = {
@@ -13,9 +13,9 @@ const firebaseConfig = {
     measurementId: "G-RZBVVPP31Y"
 };
 
-// تهيئة Firebase وقاعدة بيانات Firestore
+// تهيئة Firebase وقاعدة البيانات
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
 const days = ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 
@@ -41,8 +41,8 @@ function generateSchedule() {
 
     let [wakeH, wakeM] = wakeTime.split(':').map(Number);
     let [sleepH, sleepM] = sleepTime.split(':').map(Number);
-    let startMinutes = wakeH * 60 + wakeM + 60; // نبدأ بعد ساعة من الاستيقاظ
-    let endMinutes = sleepH * 60 + sleepM - 30;  // ننتهي قبل نصف ساعة من النوم
+    let startMinutes = wakeH * 60 + wakeM + 60; 
+    let endMinutes = sleepH * 60 + sleepM - 30;  
     if (endMinutes < startMinutes) endMinutes += 24 * 60;
 
     const availableMinutes = endMinutes - startMinutes;
@@ -68,12 +68,12 @@ function generateSchedule() {
         }
     });
 
-    // حفظ الجدول في Firebase وعرضه فوراً
+    // حفظ الجدول وعرضه
     saveToFirebase(name, scheduleData);
     renderSchedule(name, scheduleData);
 }
 
-// دالة عرض الجدول في الواجهة وتفعيل التعديل اليدوي التلقائي
+// دالة عرض الجدول وتفعيل التعديل اليدوي والتحديث التلقائي
 function renderSchedule(name, scheduleData) {
     document.getElementById('display-name').innerText = name;
     const tbody = document.getElementById('schedule-body');
@@ -98,7 +98,7 @@ function renderSchedule(name, scheduleData) {
                 <span class="subject-time" contenteditable="true">${slotData.time}</span>
             `;
 
-            // عند تعديل النص أو الوقت يدوياً والخروج من الخانة، يتم الحفظ التلقائي في فايربيس
+            // الحفظ التلقائي عند التعديل اليدوي والخروج من الخانة
             slot.querySelectorAll('span').forEach(span => {
                 span.addEventListener('blur', () => {
                     const updatedSubject = slot.querySelector('.subject-name').innerText.trim();
@@ -121,21 +121,22 @@ function renderSchedule(name, scheduleData) {
     document.getElementById('schedule-section').classList.remove('hidden');
 }
 
-// دالة حفظ الجدول في قاعدة البيانات
+// دالة حفظ البيانات في Realtime Database
 async function saveToFirebase(studentName, scheduleData) {
     try {
-        await setDoc(doc(db, "schedules", studentName), {
+        // الحفظ في مسار محدد باسم الطالب
+        await set(ref(db, 'schedules/' + studentName), {
             studentName: studentName,
             schedule: scheduleData,
-            lastUpdated: new Date()
+            lastUpdated: new Date().toISOString()
         });
-        console.log("تم الحفظ في قاعدة بيانات stud-2027 بنجاح!");
+        console.log("تم الحفظ بنجاح في Realtime Database!");
     } catch (e) {
-        console.error("حدث خطأ أثناء الحفظ: ", e);
+        console.error("خطأ في الحفظ: ", e);
     }
 }
 
-// دالة لاسترجاع جدول الطالب إذا كتب اسمه الثنائي وكان مسجلاً من قبل
+// دالة استرجاع الجدول القديم
 async function checkExistingStudent() {
     const name = document.getElementById('student-name').value.trim();
     if (!name) {
@@ -144,11 +145,9 @@ async function checkExistingStudent() {
     }
     
     try {
-        const docRef = doc(db, "schedules", name);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
+        const snapshot = await get(ref(db, 'schedules/' + name));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
             renderSchedule(data.studentName, data.schedule);
             alert(`أهلاً بك مجدداً يا ${name}، تم تحميل جدولك بنجاح!`);
         } else {
