@@ -19,6 +19,21 @@
     <div class="bg-glow bg-glow-1"></div>
     <div class="bg-glow bg-glow-2"></div>
 
+    <!-- شاشة الترحيب وتسجيل الدخول للمرة الأولى (Welcome Modal) -->
+    <div class="modal-overlay" id="welcome-auth-modal" style="display: flex; z-index: 9999;">
+        <div class="modal-content glass-card" style="text-align: center; padding: 2.5rem; max-width: 500px;">
+            <div class="alarm-icon" style="margin-bottom: 1.5rem; color: var(--primary-color, #4f46e5);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+            </div>
+            <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">أهلاً بك في منظم السادس العلمي! 👋</h2>
+            <p style="margin-bottom: 2rem; color: #b3b3b3; line-height: 1.6;">من أجل بناء جدولك الدراسي الذكي وحفظ إنجازاتك وضمان عدم ضياع بياناتك عند الدخول من أي جهاز، يرجى تسجيل الدخول لمرة واحدة بحساب جوجل الخاص بك.</p>
+            <button type="button" onclick="window.loginWithGoogle()" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1.1rem; padding: 0.8rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 10px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+                <span>تسجيل الدخول باستخدام Google</span>
+            </button>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Main Header -->
         <header class="app-header">
@@ -94,9 +109,9 @@
                         </label>
                         <!-- Math -->
                         <label class="subject-checkbox-card checked" data-subject="رياضيات">
-                            <input type="checkbox" name="subjects" value="الرياضيات" checked>
+                            <input type="checkbox" name="subjects" value="الالرياضيات" checked>
                             <span class="subject-indicator math"></span>
-                            <span class="subject-label">الرياضيات</span>
+                            <span class="subject-label">الالرياضيات</span>
                         </label>
                     </div>
                 </div>
@@ -282,6 +297,14 @@
         </div>
     </div>
 
+    <!-- تعديل طفيف لجعل واجهة الـ JavaScript تتحكم في إخفاء الشاشة الترحيبية -->
+    <script>
+        // دالة لإخفاء شاشة تسجيل الدخول بعد النجاح
+        function hideAuthModal() {
+            const modal = document.getElementById('welcome-auth-modal');
+            if (modal) modal.style.display = 'none';
+        }
+    </script>
     <!-- App JavaScript -->
     <script src="app.js"></script>
 </body>
