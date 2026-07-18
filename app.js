@@ -1,7 +1,96 @@
 /**
  * منظم الدراسة الذكي للسادس العلمي
- * Core Logic, Schedule Generator & UI State Controller
+ * Core Logic, Schedule Generator, UI State Controller & Firebase Integration
  */
+
+// ==========================================================================
+// Firebase SDK Integration
+// ==========================================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// إعدادات Firebase الخاصة بمشروعك
+const firebaseConfig = {
+  apiKey: "AIzaSyCg4aet4KkFggw8a3RwOJcYgokZ3o95CEo",
+  authDomain: "stud-2027.firebaseapp.com",
+  databaseURL: "https://stud-2027-default-rtdb.firebaseio.com",
+  projectId: "stud-2027",
+  storageBucket: "stud-2027.firebasestorage.app",
+  messagingSenderId: "29918435060",
+  appId: "1:29918435060:web:c344d803ffc2d281cbf0a1",
+  measurementId: "G-RZBVVPP31Y"
+};
+
+// تهيئة خدمات Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// مراقبة حالة تسجيل الدخول للتحقق مما إذا كان الطالب قد سجل دخولاً مسبقاً
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        console.log("المستخدم مسجل دخول بالفعل:", user.displayName);
+        // محاولة جلب الجدول المحفوظ للطالب من Firebase
+        const docRef = doc(db, "students", user.uid);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists() && docSnap.data().schedule) {
+            const remoteData = docSnap.data();
+            state.studentName = remoteData.name;
+            state.selectedSubjects = remoteData.selectedSubjects || [];
+            state.subjectsPerDay = remoteData.subjectsPerDay || 2;
+            state.sleepTime = remoteData.sleepTime || "23:00";
+            state.wakeTime = remoteData.wakeTime || "06:00";
+            state.schedule = remoteData.schedule;
+            
+            // تحديث الحقول في الواجهة
+            studentNameInput.value = state.studentName;
+            subjectsPerDaySelect.value = state.subjectsPerDay;
+            sleepTimeInput.value = state.sleepTime;
+            wakeTimeInput.value = state.wakeTime;
+            
+            syncCheckboxes();
+            renderScheduleView();
+        }
+    }
+});
+
+// دالة تسجيل الدخول بجوجل وحفظ البيانات السحابية
+window.loginWithGoogle = function() {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      const user = result.user;
+      studentNameInput.value = user.displayName; // وضع الاسم تلقائياً في الحقل
+      saveStateToFirebase(user);
+    })
+    .catch((error) => {
+      console.error("خطأ أثناء تسجيل الدخول:", error.message);
+      alert("فشل تسجيل الدخول: " + error.message);
+    });
+}
+
+// دالة سحابية لحفظ حالة الطالب بالكامل
+async function saveStateToFirebase(user) {
+    if (!user) return;
+    try {
+        await setDoc(doc(db, "students", user.uid), {
+            name: state.studentName || user.displayName,
+            email: user.email,
+            photo: user.photoURL,
+            selectedSubjects: state.selectedSubjects,
+            subjectsPerDay: state.subjectsPerDay,
+            sleepTime: state.sleepTime,
+            wakeTime: state.wakeTime,
+            schedule: state.schedule,
+            lastLogin: new Date()
+        }, { merge: true });
+        console.log("تم مزامنة البيانات مع Firebase بنجاح.");
+    } catch (e) {
+        console.error("خطأ في حفظ البيانات سحابياً: ", e);
+    }
+}
 
 // ==========================================================================
 // Application State
@@ -88,17 +177,11 @@ const stopAlarmBtn = document.getElementById("stop-alarm-btn");
 // Time Helpers
 // ==========================================================================
 
-/**
- * Convert time string "HH:MM" to minutes from midnight
- */
 function timeToMinutes(timeStr) {
     const [hrs, mins] = timeStr.split(":").map(Number);
     return hrs * 60 + mins;
 }
 
-/**
- * Convert minutes from midnight to time string "HH:MM" (24h)
- */
 function minutesToTimeString24(minutes) {
     const hrs = Math.floor(minutes / 60) % 24;
     const mins = minutes % 60;
@@ -107,22 +190,16 @@ function minutesToTimeString24(minutes) {
     return `${hrsStr}:${minsStr}`;
 }
 
-/**
- * Convert minutes from midnight to time string (12h format with ص/م)
- */
 function minutesToTimeString12(minutes) {
     let hrs = Math.floor(minutes / 60) % 24;
     const mins = minutes % 60;
     const ampm = hrs >= 12 ? 'م' : 'ص';
     hrs = hrs % 12;
-    hrs = hrs ? hrs : 12; // 0 should be 12
+    hrs = hrs ? hrs : 12; 
     const minsStr = String(mins).padStart(2, '0');
     return `${hrs}:${minsStr} ${ampm}`;
 }
 
-/**
- * Format string "HH:MM" (24h) to "HH:MM ص/م" (12h)
- */
 function formatTime12(time24) {
     return minutesToTimeString12(timeToMinutes(time24));
 }
@@ -135,37 +212,22 @@ function buildWeeklySchedule() {
     const wakeMins = timeToMinutes(state.wakeTime);
     let sleepMins = timeToMinutes(state.sleepTime);
     
-    // If sleep is after midnight (e.g. 01:00 AM)
     if (sleepMins < wakeMins) {
         sleepMins += 24 * 60;
     }
     
     const totalAwakeMins = sleepMins - wakeMins;
     
-    // Subject pool rotation
     let subjectIndex = 0;
     const subjectsList = state.selectedSubjects;
     const numPerDay = Number(state.subjectsPerDay);
-    
-    // We calculate slot times dynamically.
-    // Recommended structure:
-    // - Morning Prep buffer: 60 mins from waking.
-    // - Sleep Prep buffer: 60 mins before sleep.
-    // - This leaves: totalAwakeMins - 120 mins.
-    // Let's divide the remaining time into N study sessions and breaks.
-    // Break sizes: 30 minutes, with a longer lunch/rest break of 60 minutes if N >= 2
     
     const morningBuffer = 60; 
     const nightBuffer = 60;
     const availableStudyBlockMins = totalAwakeMins - morningBuffer - nightBuffer;
     
-    // Let's formulate breaks:
-    // If N = 1: 0 breaks (just 1 big study block).
-    // If N = 2: 1 break (45 mins).
-    // If N = 3: 2 breaks (1 break of 30m, 1 break of 60m = 90m total).
-    // If N = 4: 3 breaks (2 breaks of 30m, 1 break of 60m = 120m total).
     let totalBreakMins = 0;
-    let breakPattern = []; // Array of break durations
+    let breakPattern = []; 
     
     if (numPerDay === 2) {
         totalBreakMins = 45;
@@ -187,7 +249,6 @@ function buildWeeklySchedule() {
         const daySlots = [];
         let currentPointer = wakeMins;
         
-        // 1. Morning Routine
         daySlots.push({
             type: "break",
             subject: "الاستيقاظ والتحضير الصباحي",
@@ -197,16 +258,13 @@ function buildWeeklySchedule() {
         });
         currentPointer += morningBuffer;
         
-        // 2. Study & Break Sessions
         for (let i = 0; i < numPerDay; i++) {
-            // Assign subject from list (rotating)
             let currentSubject = "مراجعة عامة";
             if (subjectsList.length > 0) {
                 currentSubject = subjectsList[subjectIndex % subjectsList.length];
                 subjectIndex++;
             }
             
-            // Study session
             daySlots.push({
                 type: "study",
                 subject: currentSubject,
@@ -216,7 +274,6 @@ function buildWeeklySchedule() {
             });
             currentPointer += singleSessionDuration;
             
-            // Intermediary break (if not the last study session)
             if (i < numPerDay - 1) {
                 const breakDuration = breakPattern[i] || 30;
                 daySlots.push({
@@ -230,7 +287,6 @@ function buildWeeklySchedule() {
             }
         }
         
-        // 3. Night Rest buffer / Free time
         if (currentPointer < sleepMins) {
             daySlots.push({
                 type: "free",
@@ -251,9 +307,6 @@ function buildWeeklySchedule() {
 // UI Rendering Controllers
 // ==========================================================================
 
-/**
- * Update UI screens based on schedule existence
- */
 function toggleScreens(hasSchedule) {
     if (hasSchedule) {
         setupSection.classList.add("hidden");
@@ -264,18 +317,13 @@ function toggleScreens(hasSchedule) {
     }
 }
 
-/**
- * Render stats panels
- */
 function renderStats() {
-    // Total awake hours
     const wakeMins = timeToMinutes(state.wakeTime);
     let sleepMins = timeToMinutes(state.sleepTime);
     if (sleepMins < wakeMins) sleepMins += 24 * 60;
     const awakeHours = ((sleepMins - wakeMins) / 60).toFixed(1);
     statActiveHours.textContent = `${awakeHours} ساعة`;
     
-    // Total recommended study hours per day
     let dailyStudyMinutes = 0;
     const saturdaySlots = state.schedule.Saturday || [];
     saturdaySlots.forEach(slot => {
@@ -287,10 +335,8 @@ function renderStats() {
     const studyHours = (dailyStudyMinutes / 60).toFixed(1);
     statStudyHours.textContent = `${studyHours} ساعات`;
     
-    // Subjects count
     statSubjectsCount.textContent = `${state.selectedSubjects.length} مواد`;
     
-    // Completion rate of the week
     let totalStudySlots = 0;
     let completedStudySlots = 0;
     
@@ -310,15 +356,12 @@ function renderStats() {
     statCompletionPct.textContent = `${pct}%`;
 }
 
-/**
- * Render the interactive daily timeline schedule
- */
 function renderActiveDayTimeline() {
     const slots = state.schedule[state.currentDay] || [];
     timelineContainer.innerHTML = "";
     
     if (slots.length === 0) {
-        timelineContainer.innerHTML = `<div class="no-slots">لا يوجد حصص مضافة لهذا اليوم.</div>`;
+        timelineContainer.innerHTML = `<div class="no-slots">لا يوجد حصص مضاف لهذا اليوم.</div>`;
         return;
     }
     
@@ -327,16 +370,13 @@ function renderActiveDayTimeline() {
         slotCard.className = `slot-card ${slot.completed ? 'completed' : ''}`;
         slotCard.setAttribute("data-subject-type", slot.type === 'study' ? slot.subject : 'استراحة');
         
-        // Bullet point on vertical line
         const bullet = document.createElement("div");
         bullet.className = "slot-bullet";
         slotCard.appendChild(bullet);
         
-        // Left side contents: checkbox + subject info
         const info = document.createElement("div");
         info.className = "slot-info";
         
-        // Checkbox only for study slots
         if (slot.type === "study") {
             const checkbox = document.createElement("div");
             checkbox.className = `slot-checkbox ${slot.completed ? 'checked' : ''}`;
@@ -351,7 +391,6 @@ function renderActiveDayTimeline() {
             });
             info.appendChild(checkbox);
         } else {
-            // Placeholder margin for non-study items to align them
             const placeholder = document.createElement("div");
             placeholder.style.width = "22px";
             info.appendChild(placeholder);
@@ -373,7 +412,6 @@ function renderActiveDayTimeline() {
         info.appendChild(meta);
         slotCard.appendChild(info);
         
-        // Actions side: Edit button
         const actions = document.createElement("div");
         actions.className = "slot-actions";
         
@@ -394,9 +432,6 @@ function renderActiveDayTimeline() {
     });
 }
 
-/**
- * Handle day tabs switching
- */
 function setupTabs() {
     const tabButtons = daysTabsList.querySelectorAll(".tab-btn");
     tabButtons.forEach(btn => {
@@ -406,7 +441,6 @@ function setupTabs() {
             state.currentDay = btn.getAttribute("data-day");
             renderActiveDayTimeline();
             
-            // Randomize tip of the day occasionally
             const randIdx = Math.floor(Math.random() * motivationalTips.length);
             motivationalTipEl.textContent = motivationalTips[randIdx];
         });
@@ -420,7 +454,6 @@ function setupTabs() {
 function populateModalSubjectDropdown() {
     editSubjectSelect.innerHTML = "";
     
-    // Add selected study subjects
     state.selectedSubjects.forEach(sub => {
         const opt = document.createElement("option");
         opt.value = sub;
@@ -428,7 +461,6 @@ function populateModalSubjectDropdown() {
         editSubjectSelect.appendChild(opt);
     });
     
-    // Add default utilities
     const utilities = [
         "استراحة قصيرة وتجديد نشاط",
         "استراحة غداء وغداء وروتين",
@@ -451,15 +483,12 @@ function openEditModal(day, idx) {
     editDayIdInput.value = day;
     editSlotIdxInput.value = idx;
     
-    // Populate select options
     populateModalSubjectDropdown();
     
-    // Set current values
     editSubjectSelect.value = slot.subject;
     editStartTimeInput.value = slot.start;
     editEndTimeInput.value = slot.end;
     
-    // Show modal
     editSlotModal.classList.remove("hidden");
 }
 
@@ -473,13 +502,10 @@ function saveEditedSlot() {
     
     const originalSlot = state.schedule[day][idx];
     
-    // Update values
     originalSlot.subject = editSubjectSelect.value;
     originalSlot.start = editStartTimeInput.value;
     originalSlot.end = editEndTimeInput.value;
     
-    // Check if it is a study session type
-    // If it was changed to an activity/break, label its type accordingly
     const breaksList = [
         "استراحة قصيرة وتجديد نشاط",
         "استراحة غداء وغداء وروتين",
@@ -492,8 +518,8 @@ function saveEditedSlot() {
         originalSlot.type = "study";
     }
     
-    // Save, render and notify
     saveStateToLocalStorage();
+    saveStateToFirebase(auth.currentUser); // مزامنة بعد التعديل الحصص
     renderActiveDayTimeline();
     renderStats();
     closeEditModal();
@@ -504,24 +530,22 @@ function toggleSlotComplete(day, idx) {
     if (slot && slot.type === "study") {
         slot.completed = !slot.completed;
         saveStateToLocalStorage();
+        saveStateToFirebase(auth.currentUser); // مزامنة حالة الإنجاز
         renderActiveDayTimeline();
         renderStats();
     }
 }
 
 // ==========================================================================
-// Alarm System & Web Audio Siren (Piercing Alert)
+// Alarm System & Web Audio Siren
 // ==========================================================================
 
 let audioCtx = null;
 let alarmIntervalId = null;
 let alarmActive = false;
 let currentAlarmingSlot = null;
-let firedAlarms = {}; // Keys: "day-idx-HH:MM"
+let firedAlarms = {}; 
 
-/**
- * Resumes or initializes AudioContext on user interaction to satisfy browser security
- */
 function resumeAudioContext() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -531,22 +555,14 @@ function resumeAudioContext() {
     }
 }
 
-/**
- * Starts a loud, looping dual-oscillator sawtooth siren in 250ms pulses
- */
 function startAlarmSound() {
-    if (alarmIntervalId) return; // Already running
-    
+    if (alarmIntervalId) return; 
     resumeAudioContext();
-    
     let toggle = true;
     
     alarmIntervalId = setInterval(() => {
         if (!audioCtx) return;
-        
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         
         const osc1 = audioCtx.createOscillator();
         const osc2 = audioCtx.createOscillator();
@@ -556,12 +572,12 @@ function startAlarmSound() {
         osc2.connect(gainNode);
         gainNode.connect(audioCtx.destination);
         
-        osc1.type = 'sawtooth'; // Harsh piercing wave
-        osc2.type = 'sine';     // Adds thickness to the sound
+        osc1.type = 'sawtooth'; 
+        osc2.type = 'sine';     
         
-        const frequency = toggle ? 880 : 1200; // Alternating pitch
+        const frequency = toggle ? 880 : 1200; 
         osc1.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-        osc2.frequency.setValueAtTime(frequency + 4, audioCtx.currentTime); // Minor detuning for chorus/siren feel
+        osc2.frequency.setValueAtTime(frequency + 4, audioCtx.currentTime); 
         toggle = !toggle;
         
         gainNode.gain.setValueAtTime(0.9, audioCtx.currentTime);
@@ -574,9 +590,6 @@ function startAlarmSound() {
     }, 250);
 }
 
-/**
- * Stops the siren interval
- */
 function stopAlarmSound() {
     if (alarmIntervalId) {
         clearInterval(alarmIntervalId);
@@ -584,9 +597,6 @@ function stopAlarmSound() {
     }
 }
 
-/**
- * Activates the alarm state, opens overlay and plays sound
- */
 function triggerAlarm(day, idx, slot) {
     if (alarmActive) return;
     alarmActive = true;
@@ -598,9 +608,6 @@ function triggerAlarm(day, idx, slot) {
     startAlarmSound();
 }
 
-/**
- * Dismisses the alarm, stops sound, hides overlay and redirects user to active day
- */
 function dismissAlarm() {
     if (!alarmActive) return;
     
@@ -609,17 +616,12 @@ function dismissAlarm() {
     alarmActive = false;
     
     if (currentAlarmingSlot) {
-        // Switch tab to the day of the alarm and redraw
         state.currentDay = currentAlarmingSlot.day;
         renderScheduleView();
     }
-    
     currentAlarmingSlot = null;
 }
 
-/**
- * Running background check matching current time with study schedules
- */
 function checkAlarmTicker() {
     if (alarmActive) return;
     if (!state.schedule || Object.keys(state.schedule).length === 0) return;
@@ -663,20 +665,33 @@ function loadStateFromLocalStorage() {
     return false;
 }
 
+// ميزة لمزامنة مربعات الاختيار تلقائياً عند تحميل البيانات السحابية
+function syncCheckboxes() {
+    const checkboxes = subjectsContainer.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(chk => {
+        const card = chk.closest('.subject-checkbox-card');
+        if (state.selectedSubjects.includes(chk.value)) {
+            chk.checked = true;
+            if(card) card.classList.add("checked");
+        } else {
+            chk.checked = false;
+            if(card) card.classList.remove("checked");
+        }
+    });
+}
+
 // ==========================================================================
 // Printing & Weekly Layout Generation
 // ==========================================================================
 
 function renderAllDaysForPrinting() {
-    // Check if print elements exist, delete them to rebuild fresh
     const oldPrintSec = document.querySelectorAll(".days-print-section");
     oldPrintSec.forEach(el => el.remove());
     
-    // Create print container inside schedule container so CSS handles it
     daysOrder.forEach(day => {
         const printSec = document.createElement("div");
         printSec.className = "days-print-section print-only";
-        printSec.style.display = "none"; // Hidden on screen by default
+        printSec.style.display = "none"; 
         
         const title = document.createElement("h3");
         title.className = "days-print-title";
@@ -723,12 +738,10 @@ function renderAllDaysForPrinting() {
 // ==========================================================================
 
 function init() {
-    // 1. Theme and checkboxes dynamic interactions on form
     const checkboxCards = subjectsContainer.querySelectorAll(".subject-checkbox-card");
     checkboxCards.forEach(card => {
         const checkbox = card.querySelector('input[type="checkbox"]');
         
-        // Sync visual card wrapper state to inputs
         checkbox.addEventListener("change", () => {
             if (checkbox.checked) {
                 card.classList.add("checked");
@@ -738,7 +751,6 @@ function init() {
         });
     });
 
-    // 2. Setup Generate Schedule Trigger
     generateBtn.addEventListener("click", () => {
         const nameVal = studentNameInput.value.trim();
         if (!nameVal) {
@@ -747,7 +759,6 @@ function init() {
             return;
         }
         
-        // Extract selected subjects
         const selectedChks = subjectsContainer.querySelectorAll('input[type="checkbox"]:checked');
         const chosenSubjects = Array.from(selectedChks).map(chk => chk.value);
         
@@ -756,7 +767,6 @@ function init() {
             return;
         }
         
-        // Save form fields to state
         state.studentName = nameVal;
         state.selectedSubjects = chosenSubjects;
         state.subjectsPerDay = Number(subjectsPerDaySelect.value);
@@ -764,69 +774,47 @@ function init() {
         state.wakeTime = wakeTimeInput.value;
         state.currentDay = "Saturday";
         
-        // Generate
         state.schedule = buildWeeklySchedule();
         
-        // Save & Render
         saveStateToLocalStorage();
+        saveStateToFirebase(auth.currentUser); // مزامنة بعد توليد الجدول
         renderScheduleView();
     });
 
-    // 3. Edit settings back trigger
     editSettingsBtn.addEventListener("click", () => {
         toggleScreens(false);
     });
 
-    // 4. Print click
     printBtn.addEventListener("click", () => {
         renderAllDaysForPrinting();
         window.print();
     });
 
-    // 5. Modal actions
     closeModalBtn.addEventListener("click", closeEditModal);
     cancelSlotBtn.addEventListener("click", closeEditModal);
     saveSlotBtn.addEventListener("click", saveEditedSlot);
     
-    // Close modal clicking outside
     window.addEventListener("click", (e) => {
         if (e.target === editSlotModal) {
             closeEditModal();
         }
     });
 
-    // Alarm actions & setup
     stopAlarmBtn.addEventListener("click", dismissAlarm);
     document.addEventListener("click", resumeAudioContext);
     
-    // Start background timer check for alarms
     setInterval(checkAlarmTicker, 10000);
 
-    // 6. Init tabs
     setupTabs();
 
-    // 7. Load from localstorage if present
     const loaded = loadStateFromLocalStorage();
     if (loaded && state.studentName && Object.keys(state.schedule).length > 0) {
-        // Pre-fill form values in case they edit settings later
         studentNameInput.value = state.studentName;
         subjectsPerDaySelect.value = state.subjectsPerDay;
         sleepTimeInput.value = state.sleepTime;
         wakeTimeInput.value = state.wakeTime;
         
-        // Pre-fill checkboxes
-        const checkboxes = subjectsContainer.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(chk => {
-            const card = chk.closest('.subject-checkbox-card');
-            if (state.selectedSubjects.includes(chk.value)) {
-                chk.checked = true;
-                card.classList.add("checked");
-            } else {
-                chk.checked = false;
-                card.classList.remove("checked");
-            }
-        });
-        
+        syncCheckboxes();
         renderScheduleView();
     } else {
         toggleScreens(false);
@@ -836,7 +824,6 @@ function init() {
 function renderScheduleView() {
     scheduleStudentTitle.textContent = `الجدول الدراسي للبطل: ${state.studentName}`;
     
-    // Set active tab to current day
     const tabs = daysTabsList.querySelectorAll(".tab-btn");
     tabs.forEach(btn => {
         if (btn.getAttribute("data-day") === state.currentDay) {
