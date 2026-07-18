@@ -28,11 +28,21 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// مراقبة حالة تسجيل الدخول للتحقق مما إذا كان الطالب قد سجل دخولاً مسبقاً
+// دالة إخفاء الشاشة الترحيبية
+function hideAuthModal() {
+    const authModal = document.getElementById('welcome-auth-modal');
+    if (authModal) {
+        authModal.style.display = 'none';
+    }
+}
+
+// مراقبة حالة تسجيل الدخول عند فتح الموقع
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         console.log("المستخدم مسجل دخول بالفعل:", user.displayName);
-        // محاولة جلب الجدول المحفوظ للطالب من Firebase
+        hideAuthModal(); // إخفاء شاشة الترحيب فوراً لأن الطالب مسجل مسبقاً
+        
+        // جلب الجدول المحفوظ للطالب من Firebase
         const docRef = doc(db, "students", user.uid);
         const docSnap = await getDoc(docRef);
         
@@ -54,20 +64,25 @@ onAuthStateChanged(auth, async (user) => {
             syncCheckboxes();
             renderScheduleView();
         }
+    } else {
+        // إذا لم يكن مسجل دخول، نضمن ظهور الشاشة الترحيبية
+        const authModal = document.getElementById('welcome-auth-modal');
+        if (authModal) authModal.style.display = 'flex';
     }
 });
 
-// دالة تسجيل الدخول بجوجل وحفظ البيانات السحابية
+// دالة تسجيل الدخول بجوجل المرتبطة بالزر في الـ HTML
 window.loginWithGoogle = function() {
   signInWithPopup(auth, provider)
     .then((result) => {
       const user = result.user;
-      studentNameInput.value = user.displayName; // وضع الاسم تلقائياً في الحقل
+      studentNameInput.value = user.displayName; 
+      hideAuthModal(); // إخفاء الشاشة الترحيبية بعد نجاح الدخول
       saveStateToFirebase(user);
     })
     .catch((error) => {
       console.error("خطأ أثناء تسجيل الدخول:", error.message);
-      alert("فشل تسجيل الدخول: " + error.message);
+      alert("فشل فتح نافذة جوجل: " + error.message);
     });
 }
 
@@ -101,7 +116,7 @@ let state = {
     subjectsPerDay: 2,
     sleepTime: "23:00",
     wakeTime: "06:00",
-    schedule: {}, // Format: { Saturday: [ { type, subject, start, end, completed }, ... ], ... }
+    schedule: {}, 
     currentDay: "Saturday"
 };
 
@@ -125,7 +140,7 @@ const motivationalTips = [
     "تذكر دائماً: معدل السادس العلمي يُبنى يوماً بعد يوم، الحصة الحالية هي الأهم.",
     "الاستراحة بين المواد ليست إضاعة للوقت، بل إعادة شحن لعقلك ليستوعب المزيد.",
     "الرياضيات والفيزياء تحتاجان إلى ورقة وقلم وفهم عميق للقوانين قبل البدء بالمسائل.",
-    "لا تدع التراكمات تحبطك. ابدأ اليوم بصفحة جديدة وتدرج في إنجاز أهدافك.",
+    "لا تدع التراكمات تحبطك. ابدأ اليوم بصفحة جديدة وتدرج in إنجاز أهدافك.",
     "النوم الكافي (6-8 ساعات) يثبت المعلومات في الذاكرة طويلة المدى. لا تهمل وقت نومك."
 ];
 
@@ -361,7 +376,7 @@ function renderActiveDayTimeline() {
     timelineContainer.innerHTML = "";
     
     if (slots.length === 0) {
-        timelineContainer.innerHTML = `<div class="no-slots">لا يوجد حصص مضاف لهذا اليوم.</div>`;
+        timelineContainer.innerHTML = `<div class="no-slots">لا يوجد حصص مضافة لهذا اليوم.</div>`;
         return;
     }
     
@@ -519,7 +534,7 @@ function saveEditedSlot() {
     }
     
     saveStateToLocalStorage();
-    saveStateToFirebase(auth.currentUser); // مزامنة بعد التعديل الحصص
+    saveStateToFirebase(auth.currentUser); 
     renderActiveDayTimeline();
     renderStats();
     closeEditModal();
@@ -530,7 +545,7 @@ function toggleSlotComplete(day, idx) {
     if (slot && slot.type === "study") {
         slot.completed = !slot.completed;
         saveStateToLocalStorage();
-        saveStateToFirebase(auth.currentUser); // مزامنة حالة الإنجاز
+        saveStateToFirebase(auth.currentUser); 
         renderActiveDayTimeline();
         renderStats();
     }
@@ -665,7 +680,6 @@ function loadStateFromLocalStorage() {
     return false;
 }
 
-// ميزة لمزامنة مربعات الاختيار تلقائياً عند تحميل البيانات السحابية
 function syncCheckboxes() {
     const checkboxes = subjectsContainer.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(chk => {
@@ -697,9 +711,6 @@ function renderAllDaysForPrinting() {
         title.className = "days-print-title";
         title.textContent = `جدول يوم: ${dayNamesAr[day]}`;
         printSec.appendChild(title);
-        
-        const timeline = document.createElement("div");
-        timeline.className = "schedule-timeline";
         
         const slots = state.schedule[day] || [];
         slots.forEach(slot => {
@@ -777,7 +788,7 @@ function init() {
         state.schedule = buildWeeklySchedule();
         
         saveStateToLocalStorage();
-        saveStateToFirebase(auth.currentUser); // مزامنة بعد توليد الجدول
+        saveStateToFirebase(auth.currentUser); 
         renderScheduleView();
     });
 
